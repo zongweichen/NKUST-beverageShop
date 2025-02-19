@@ -26,6 +26,8 @@ Route::get("products", 'App\Http\Controllers\ProductController@index');
 Route::group(['prefix' => 'product'], function () {
     Route::get("/", "App\Http\Controllers\ProductController@index");
     // gitRoute::post("create", "App\Http\Controllers\ProductController@store");
+    Route::get("description/{id}","App\Http\Controllers\ProductController@description");
+    Route::get('onlineShop', 'App\Http\Controllers\ProductController@onlineShop')->name('product.onlineShop');
 });
 
 

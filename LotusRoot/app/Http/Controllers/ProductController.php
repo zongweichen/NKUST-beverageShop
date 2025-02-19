@@ -12,12 +12,12 @@ class ProductController extends Controller
 {
     public function indexForMainPage()
     {
-        $products = Product::all();
+        $products = Product::find(13);
         return view('index', compact('products'));
     }
     public function index()
     {
-        $products = Product::all();
+        $products = Product::paginate(5);
         return view('product.onlineShop', compact('products'));
     }
 
@@ -27,6 +27,19 @@ class ProductController extends Controller
         // dd($products);      
         return view('manage.revise_product',compact("products"));
         // print_r($products);
+    }
+
+    public function description($id)
+    {
+        $product = Product::find($id); //取得所有輸入資料
+        // dd($product);      
+        return view('product.product_description',compact("product"));
+        // print_r($product);
+    }
+
+    public function onlineShop()
+    {
+        return view('product.onlineShop');
     }
 
     public function store(Request $request)
