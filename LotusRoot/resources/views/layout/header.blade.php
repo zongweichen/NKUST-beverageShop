@@ -124,30 +124,44 @@
                 </li>
                 <!-- 電腦版的會員及購物車 -->
                 <li class="nav-item d-lg-block d-none">
-                    <div class="d-flex me-sm-0 align-items-center">
-                        <!-- 會員 -->
+                <div class="d-flex me-sm-0 align-items-center justify-content-between w-100">
+                    <!-- 🔹 會員區塊 -->
+                    <div class="d-flex align-items-center">
                         {{ csrf_field() }}
                         @if (session()->has('user_id'))
-                        <div>
-                            <a class="text-darkred nav-link"
-                                href="{{ route('signout') }}"
-                                title="點擊">
-                                <i class="bi bi-person"></i>
-                                <span class="text-darkred d-md-inline-block d-none">登出</span>
-                            </a>
-                        </div>
-                        @else
-                        <div>
-                            <a class="text-darkred nav-link"
-                                href="javascript:;"
-                                title="點擊"
-                                data-bs-toggle="modal"
-                                data-bs-target="#exampleModal">
-                                <i class="bi bi-person"></i>
-                                <span class="text-darkred d-md-inline-block d-none">登入</span>
-                            </a>
-                        </div>
-                        @endif
+                            @if (session('user_type') === 'A') 
+                                {{-- 管理員按鈕 (編輯) --}}
+                                <div class="dropdown">
+                                    <a class="text-darkred nav-link dropdown-toggle" href="#" role="button" id="adminDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-pencil-square"></i>
+                                        <span class="text-darkred d-md-inline-block d-none">管理員</span>
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                        <li><a class="dropdown-item" href="http://localhost:8080/user/auth/editProfileGet">修改會員資料</a></li>
+                                        <li><a class="dropdown-item" href="#">選項 2</a></li>
+                                        <li><a class="dropdown-item" href="#">選項 3</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" href="{{ route('signout') }}">登出</a></li>
+                                    </ul>
+                                </div>
+                            @else
+                                {{-- 一般會員按鈕 (登出) --}}
+                                <div>
+                                    <a class="text-darkred nav-link" href="{{ route('signout') }}" title="登出">
+                                        <i class="bi bi-person"></i>
+                                        <span class="text-darkred d-md-inline-block d-none">登出</span>
+                                    </a>
+                                </div>
+                            @endif
+                            @else
+                                {{-- 訪客按鈕 (登入) --}}
+                                <div>
+                                    <a class="text-darkred nav-link" href="javascript:;" data-bs-toggle="modal" data-bs-target="#exampleModal" title="登入">
+                                        <i class="bi bi-person"></i>
+                                        <span class="text-darkred d-md-inline-block d-none">登入</span>
+                                    </a>
+                                </div>
+                            @endif
                         <!-- 購物車 -->
                         @if(session()->has('user_id'))
                         <div class="cart-btn">

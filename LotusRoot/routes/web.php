@@ -13,14 +13,16 @@ Route::get('/menu', function () {
 Route::group(['prefix' => 'user'], function () {
     Route::group(['prefix' => 'auth'], function () {
         Route::get('test', 'App\Http\Controllers\UserAuthController@Signtest')->middleware(AuthUserAdminMiddleware::class);
+        // 註冊邏輯
         Route::post('signup', 'App\Http\Controllers\UserAuthController@SignUpProcess');
+        // 登入邏輯
         Route::post('signin', 'App\Http\Controllers\UserAuthController@SigninProcess');
+        // 清除 session 中的 user_id
         Route::get('signout', 'App\Http\Controllers\UserAuthController@SignOut')->name('signout');
-        Route::get('editProfileGet', 'App\Http\Controllers\UserAuthController@editProfileGet');
-        Route::post('editProfilePost', 'App\Http\Controllers\UserAuthController@editProfilePost')->name('editProfilePost');
-        Route::get('test123Get', 'App\Http\Controllers\UserAuthController@test123Get')->name('test123Get');
-        
-        
+        // 變更會員資料頁面
+        Route::get('editProfileGet', 'App\Http\Controllers\UserAuthController@editProfileGet')->name('editProfileGet');
+        // 變更會員資料邏輯
+        Route::post('editProfilePost', 'App\Http\Controllers\UserAuthController@editProfilePost')->name('editProfilePost');  
     });
 });
 //google登入

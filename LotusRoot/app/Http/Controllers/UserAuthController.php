@@ -90,7 +90,6 @@ class UserAuthController extends Controller
            ], 500);  // 500 是伺服器錯誤代碼
         }
     }
-
      // 登入邏輯
     public function SignInProcess(Request $request)
     {
@@ -131,8 +130,12 @@ class UserAuthController extends Controller
             ], 400);
         }
 
-        // 設置 Session
-        session()->put('user_id', $tmpuser->id);
+        session([
+            'user_id' => $tmpuser->id,
+            'user_type' => $tmpuser->type, // 'G' = 一般使用者, 'A' = 管理員
+        ]);
+
+       
 
         // 判斷使用者類型，管理者 (A) 跳轉 /user/auth/test，會員 (G) 跳轉 /
         $redirect_url = ($tmpuser->type === 'A') ? '/user/auth/editProfileGet' : '/';
@@ -144,7 +147,6 @@ class UserAuthController extends Controller
             'redirect_url' => $redirect_url
         ]);
     }
-
     // 清除 session 中的 user_id
     public function SignOut()
     {
@@ -155,7 +157,7 @@ class UserAuthController extends Controller
     public function Signtest() {
         return view('layout.main'); 
     }
-    // 會員更新頁面頁面
+    // 會員變更頁面
     public function editProfileGet()
     {
         $userId = Session::get('user_id'); // 從 session 取得 user_id
@@ -172,42 +174,53 @@ class UserAuthController extends Controller
 
         return view('layout.member', compact('user')); // 傳遞 $user 給 Blade
     }
-    // 會員更新邏輯
-    
+    // 會員變更邏輯
     public function editProfilePost(Request $request)
     {
         $user = User::find(session('user_id'));
-    
+
         if (!$user) {
-            return response()->json(['error' => '用戶不存在！'], 404);
+            return response()->json(['errors' => ['general' => ['用戶不存在！']]], 404);
         }
-    
+
         // 驗證舊密碼是否正確
         if (!Hash::check($request->input('password'), $user->password)) {
-            return response()->json(['error' => '舊密碼不正確！'], 400);
+            return response()->json(['errors' => ['password' => ['舊密碼不正確！']]], 400);
         }
-    
+
+        // 驗證輸入欄位 加規則限制
+        $validator = Validator::make($request->all(), [
+            'username'   => ['required', 'string', 'max:255'],
+            'email'      => ['required', 'email', 'max:255'],
+            'mobile_phone' => ['required', 'string', 'max:15'],
+            'dpassword'  => ['nullable', 'string', 'min:6', 'max:10', 'regex:/^[A-Z]/'],
+            'email' => ['required', 'email', 'regex:/^[^@]+@[^@]+\.(com|tw|net|org)$/'],
+            'mobile_phone' => ['required', 'regex:/^09\d{8}$/'],
+        ], [
+            'dpassword.regex' => '新密碼必須以大寫字母開頭！',
+            'dpassword.min' => '新密碼至少需要 6 個字元！',
+            'dpassword.max' => '新密碼最多只能 10 個字元！',
+            'email.regex' => '電子郵件格式錯誤，請包含 @ 及 .com！',
+            'mobile_phone.regex' => '手機號碼必須以 09 開頭，且為 10 位數字！',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
         // 更新用戶資料
         $user->name = $request->input('username');
         $user->email = $request->input('email');
         $user->phone_number = $request->input('mobile_phone');
-    
+
         // 若有提供新密碼，則更新
         if ($request->filled('dpassword')) {
             $user->password = Hash::make($request->input('dpassword'));
         }
-    
+
         $user->save();
-    
-        return response()->json(['success' => '更新成功！', 'redirect' => route('test123Get')]);
-    }
-    
 
-    // 會員更新成到導入頁面
-    public function test123Get() {
-        return view('layout.test123'); 
+        return response()->json(['success' => '更新成功！']);
     }
-        
-
-    
+ 
 }
